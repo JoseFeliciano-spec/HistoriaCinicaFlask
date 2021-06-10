@@ -6,5 +6,5 @@ app = Flask(__name__);
 
 Routes(app);
 
-print(connectDb());
+""" print(connectDb()); """
 app.run(debug=True);
