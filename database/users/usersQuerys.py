@@ -116,7 +116,6 @@ class UsersDB:
     def printObservationUser(id):
         try:
             db = connectDb();
-
             cursor = db.cursor();
 
             query = """ 
@@ -128,6 +127,7 @@ class UsersDB:
             rows = cursor.fetchall();
 
             arr = [];
+            
             for row in rows:
                 map = {
                     "idPaciente": str(row[1]),
@@ -183,4 +183,33 @@ class UsersDB:
         except Exception as ex:
             print("El error : {}".format(ex))
             return False;
+    
+    def createPdfDetails(id):
+        try:
+            db = connectDb();
+
+            cursor = db.cursor();
+
+            query = """ 
+                SELECT * FROM "public"."observaciones" where "IdPaciente" = {} 
+            """.format(id);
+
+            cursor.execute(query);
+
+            rows = cursor.fetchall();
+
+            arr = [];
+            for row in rows:
+                map = {
+                    "idPaciente": str(row[1]),
+                    "idMedico": str(row[2]),
+                    "observation": (row[3]),
+                    "healthCondition": row[4]
+                }
+                arr.append(map);
+            return True, arr;
+        except Exception as ex:
+            return False, None;
+            print("Error : {}".format(ex));
+
     

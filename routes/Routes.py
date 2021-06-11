@@ -5,6 +5,11 @@ from database.medics.medicQuery import MedicDB;
 from utils.verifyEmail import verifyEmail; 
 from utils.createSecret import createSecret;
 
+""" Impresión del pdf """
+from flask import render_template, make_response;
+import pdfkit;
+path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 
 def Routes(app):
     """ Crear la secret key """
@@ -31,6 +36,8 @@ def Routes(app):
     printInformation(app)
     #Cambio de contraseña usuarios (Paciente y Hospital)
     changePasswordAllUser(app)
+    #Imprimir observaciones del paciente
+    printDocumentPacient(app)
 
 def registerUser(app):
     @app.route("/api/registerUser", methods=["POST"])
@@ -336,4 +343,26 @@ def changePasswordAllUser(app):
                 return jsonify([response]);
             else:
                 response = {"response": "No se ha podido actualizar correctamente la contraseña"};
-                return jsonify([response]);            
+                return jsonify([response]);
+
+""" 
+    Pdf imprimir
+""" 
+def printDocumentPacient(app):
+    @app.route("/api/printPacient/<id>", methods=["GET"])
+    def printPdf(id):
+        if id != None:
+            isTrue, data = UsersDB.createPdfDetails(id);
+
+            if isTrue:
+                rendered = render_template("pdf_template.html", 
+                pacient="Null", observation={data[0]["observation"]});
+                pdf = pdfkit.from_string(rendered, False, configuration=config);
+                response = make_response(pdf);
+                response.headers['Content-Type'] = "application/pdf";
+                response.headers['Content-Disposition'] = "inline; filename = paciente.pdf"; 
+                return response;
+
+        response = {"response": "Ingrese un Id"};
+        return jsonify([response]);
+
