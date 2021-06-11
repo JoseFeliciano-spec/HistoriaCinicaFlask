@@ -1,8 +1,10 @@
 from re import I
-from flask import request, jsonify, session;
-from database.users.usersQuerys import UsersDB; 
+from flask import json, request, jsonify, session;
+from database.users.usersQuerys import UsersDB;
+from database.medics.medicQuery import MedicDB; 
 from utils.verifyEmail import verifyEmail; 
 from utils.createSecret import createSecret;
+
 
 def Routes(app):
     """ Crear la secret key """
@@ -19,6 +21,10 @@ def Routes(app):
     regInformationUser(app);
     #Registrar un médico, (solamente los usuarios tipo hospital)
     registerMedic(app);
+    #Loguear al médico.
+    loginMedic(app);
+    #Cambiar contraseña primera vez (sólo médico)
+    changePassMedic(app);
 
 def registerUser(app):
     @app.route("/api/registerUser", methods=["POST"])
@@ -55,6 +61,7 @@ def verifyUser(app):
                 print("phone");
             return jsonify("asdasd");
 
+
 def loginUser(app):
     @app.route("/api/loginUser", methods=["POST"])
     def functionLogin():
@@ -75,6 +82,58 @@ def loginUser(app):
                 return jsonify([response]);
             else:
                 response = {"response": "No se puedo iniciar sesión, revise si los campos está correctos o estás verificado"};
+                return jsonify([response]);
+
+#Método que se utilizará por una sola vez (después de loguearse por primera vez);
+def changePassMedic(app):
+    @app.route("/api/changePassMedic", methods=["PUT"])
+    def functionChangeM():
+        if request.method == "PUT":
+            data = request.json;
+            if "medico" in session:
+                newPass = data["newPass"];
+                if MedicDB.firtTime(session["medico"]["id"]):
+                    arr = [newPass, session["medico"]["id"]]
+                    if MedicDB.changePasswordM(arr):
+                        response = {"response" : "Se ha cambiado la contraseña de manera satisfactoria"};
+
+                        return jsonify([response]);
+                    response =  {"response" : "Ha ocurrido un error y no se ha podido cambiar la contraseña"};
+                    return jsonify([response]);
+                else:
+                    response = {"response": "Ya expiró la primera vez para cambiar la contraseña"};
+                    return jsonify([response]);
+            else:
+                response = {"response": "Necesita loguearse para ejecutar esta función"};
+                return jsonify([response]);
+
+def loginMedic(app):
+    @app.route("/api/loginMedic", methods=["POST"])
+    def functionLogM():
+        if request.method == "POST":
+            data = request.json;
+            expressionR = (
+                not "id" in data.keys() or not "pass" in data.keys()
+            );
+
+            if expressionR:
+                response = {"response" : "Faltan aún datos"};
+                return jsonify([response]);
+
+            arr = [data["id"], data["pass"]]
+            
+            isLoginMedico, map = MedicDB.loginMedicInDb(arr);
+
+            if isLoginMedico: 
+                session["medico"] = map;
+                
+                if "medico" in session:
+                    print(session["medico"]);
+
+                response = {"response": "Se ha logueado el médico correctamente"}
+                return jsonify([response]);
+            else:
+                response = {"response" : "Ha ocurrido un error al momento de loguearse"}
                 return jsonify([response]);
 
 def registerMedic(app):
