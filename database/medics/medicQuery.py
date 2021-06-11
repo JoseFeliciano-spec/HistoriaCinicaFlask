@@ -3,6 +3,27 @@ import psycopg2;
 import json;
 
 class MedicDB:
+    def insertObservation(data, session):
+        try:
+            db = connectDb();
+            cursor = db.cursor();
+            print(session);
+            print(session["id"]);
+            query = """ 
+                INSERT INTO "public"."observaciones" ("IdPaciente", "IdMedico", "Observations", "HealthCondition") VALUES (%s, %s, %s, %s)  
+            """ 
+            val  = (data["idPaciente"], session["id"], data["observation"], data["healthco"]);
+            
+            cursor.execute(query, val);
+
+            db.commit();
+
+            return True;
+
+        except Exception as ex:
+            print("Ha ocurrido un error:  {}".format(ex));
+            return False;
+
     def loginMedicInDb(data):
         try:
             #Data es un arreglo.

@@ -25,6 +25,8 @@ def Routes(app):
     loginMedic(app);
     #Cambiar contraseña primera vez (sólo médico)
     changePassMedic(app);
+    #Introducir las observaciones (sólo los médicos)
+    regObservationP(app)
 
 def registerUser(app):
     @app.route("/api/registerUser", methods=["POST"])
@@ -231,3 +233,33 @@ def regInformationPaciente(data, session):
         return True;
     else:
         return False;
+
+
+"""
+    Insertar observaciones por parte del médico al paciente.
+"""
+def regObservationP(app):
+    @app.route("/api/regObservationP", methods=["POST"])
+    def obserPacient():
+        if request.method == "POST":
+            data = request.json;
+            if "medico" in session:
+                if expressionPacient(data):
+                    response = {"response" : "Faltan datos por ingresar"};
+                    return jsonify([response]);
+                if MedicDB.insertObservation(data, session["medico"]):
+                    response = {"response" : "El registro de la observación ha sido exitoso"};
+                    return jsonify([response]);
+                else:
+                    response = {"response" : "Ha ocurrido un error al guardar los datos"};
+                    return jsonify([response]);
+                    
+            else:
+                response = {"response" : "No está logueado para ejecutar esta acción"};
+                return jsonify([response]);
+    
+    def expressionPacient(data):
+        expression = (not "idPaciente" in data.keys()) or (not "healthco" in data.keys()) or (not "observation" in data.keys())
+        if expression:
+            return True;
+ 
