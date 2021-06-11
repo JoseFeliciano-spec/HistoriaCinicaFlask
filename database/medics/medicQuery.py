@@ -83,4 +83,34 @@ class MedicDB:
                     return False;
         except:
             return False;
+
+    def printObservationMedic(id):
+        try:
+            db = connectDb();
+
+            cursor = db.cursor();
+
+            query = """ 
+                SELECT * FROM "public"."observaciones" where "IdMedico" = {} 
+            """.format(id);
+
+            cursor.execute(query);
+
+            rows = cursor.fetchall();
+
+            print(rows);
+            arr = [];
+            for row in rows:
+                print(row);
+                map = {
+                    "idPaciente": str(row[1]),
+                    "idMedico": str(row[2]),
+                    "observation": str(row[3]),
+                    "healthCondition": row[4]
+                }
+                arr.append(map);
+            return True, arr;
+        except Exception as ex:
+            return False, None;
+            print("Error : {}".format(ex));
             

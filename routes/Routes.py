@@ -27,6 +27,8 @@ def Routes(app):
     changePassMedic(app);
     #Introducir las observaciones (sólo los médicos)
     regObservationP(app)
+    #Imprimir la información
+    printInformation(app)
 
 def registerUser(app):
     @app.route("/api/registerUser", methods=["POST"])
@@ -262,4 +264,38 @@ def regObservationP(app):
         expression = (not "idPaciente" in data.keys()) or (not "healthco" in data.keys()) or (not "observation" in data.keys())
         if expression:
             return True;
- 
+
+"""
+    Imprimir todo (Octavo requisito)
+"""
+def printInformation(app):
+    @app.route("/api/printInformation", methods=["POST"])
+    def printInfos():
+        if request.method == "POST":
+            if "username" in session:
+                if "paciente" in session["username"]["type"]:
+                    id = session["username"]["id"];
+                    iPrint, data =UsersDB.printObservationUser(id);
+
+                    if iPrint:
+                        response  = data;
+                        return jsonify(response);
+
+                    response = {"response": "No se ha podido traer de la base de datos los archivos"};
+                    return jsonify([response]);
+                if "hospital" in session["username"]["type"]:
+                    print("Hospital");                    
+            if "medico" in session:
+                id = session["medico"]["id"];
+                print(id);
+                iPrint, data = MedicDB.printObservationMedic(id);
+                
+                if iPrint:
+                    response  = data;
+                    return jsonify(response);
+
+                response = {"response": "No se ha podido traer de la base de datos los archivos"};
+                return jsonify([response]);
+            response = {"response" : "No estás logueado, por favor inicie sesión"};
+
+            return jsonify([response]);

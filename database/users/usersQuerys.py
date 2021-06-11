@@ -2,7 +2,9 @@ from database.connectDb import connectDb;
 import psycopg2;
 import json;
 
+#Clase que contiene todas las "Querys" de tipo usuario
 class UsersDB:
+    #Registrar usuarios de diferentes tipos.
     def registerUserInDb(data):
         try:
             db = connectDb();
@@ -17,6 +19,7 @@ class UsersDB:
             print("ha ocurrido un error");
             return False;
     
+    #Login para los usuarios de diferentes tipos
     def loginUserInDb(data):
         """ Solamente se logueará cuando el usuario esté verificado. """
         try:
@@ -42,6 +45,7 @@ class UsersDB:
         except (Exception, psycopg2.Error) as error:
             return False, 0;
     
+    # Registrar información adicional del hospital (Sólo válido para el hopsital)
     def regBasicInfoHospital(data, session):
         try:
             db = connectDb();
@@ -57,6 +61,7 @@ class UsersDB:
             print("ha ocurrido un error");
             return False;
 
+    #Registrar información básica del usuario (Paciente)
     def regBasicInfoUser(data, session):
         try:
             db = connectDb();
@@ -72,6 +77,7 @@ class UsersDB:
             print("ha ocurrido un error");
             return False;
     
+    # Registrar al médico (sólo válido para los usuarios tipo hospital)
     def registerMedic(data, session):
         try:
             db = connectDb();
@@ -91,3 +97,63 @@ class UsersDB:
         except:
             print("Ocurrió un error");
             return False;
+    
+    #Traer todas las observaciones del paciente
+    def printObservationUser(id):
+        try:
+            db = connectDb();
+
+            cursor = db.cursor();
+
+            query = """ 
+                SELECT * FROM "public"."observaciones" where "IdPaciente" = {} 
+            """.format(id);
+
+            cursor.execute(query);
+
+            rows = cursor.fetchall();
+
+            arr = [];
+            for row in rows:
+                map = {
+                    "idPaciente": str(row[1]),
+                    "idMedico": str(row[2]),
+                    "observation": str(row[3]),
+                    "healthCondition": row[4]
+                }
+                arr.append(map);
+            return True, arr;
+        except Exception as ex:
+            return False, None;
+            print("Error : {}".format(ex));
+    
+    #Traer todas las observaciones del paciente
+    """ def printObservationMedico(id):
+        try:
+            db = connectDb();
+
+            cursor = db.cursor();
+
+            query =  
+                SELECT * FROM "public"."observaciones" where "IdMedico" = {} 
+            .format(id);
+
+            cursor.execute(query);
+
+            rows = cursor.fetchall();
+
+            arr = [];
+            for row in rows:
+                map = {
+                    "idPaciente": str(row[1]),
+                    "idMedico": str(row[2]),
+                    "observation": str(row[3]),
+                    "healthCondition": row[4]
+                }
+                arr.append(map);
+            return True, arr;
+        except Exception as ex:
+            return False, None;
+            print("Error : {}".format(ex)); """
+    
+    
