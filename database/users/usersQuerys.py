@@ -128,21 +128,20 @@ class UsersDB:
             print("Error : {}".format(ex));
     
     #Traer todas las observaciones del paciente
-    """ def printObservationMedico(id):
+    def printObservationHospital(id):
         try:
             db = connectDb();
 
             cursor = db.cursor();
 
-            query =  
-                SELECT * FROM "public"."observaciones" where "IdMedico" = {} 
-            .format(id);
+            query = """ SELECT * FROM "public"."observaciones" where "IdMedico" = any (select ("Id") from "public"."medico" where "IdHospital" = {})""".format(id);
 
             cursor.execute(query);
 
             rows = cursor.fetchall();
 
             arr = [];
+            print(rows);
             for row in rows:
                 map = {
                     "idPaciente": str(row[1]),
@@ -154,6 +153,6 @@ class UsersDB:
             return True, arr;
         except Exception as ex:
             return False, None;
-            print("Error : {}".format(ex)); """
+            print("Error : {}".format(ex));
     
     

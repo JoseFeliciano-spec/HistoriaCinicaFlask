@@ -284,12 +284,20 @@ def printInformation(app):
                     response = {"response": "No se ha podido traer de la base de datos los archivos"};
                     return jsonify([response]);
                 if "hospital" in session["username"]["type"]:
-                    print("Hospital");                    
+                    id = session["username"]["id"];
+                    iPrint, data =UsersDB.printObservationHospital(id);
+
+                    if iPrint:
+                        response  = data;
+                        return jsonify(response);
+
+                    response = {"response": "No se ha podido traer de la base de datos los archivos"};
+                    return jsonify([response]);                    
             if "medico" in session:
                 id = session["medico"]["id"];
                 print(id);
                 iPrint, data = MedicDB.printObservationMedic(id);
-                
+
                 if iPrint:
                     response  = data;
                     return jsonify(response);
