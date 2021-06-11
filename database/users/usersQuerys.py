@@ -71,3 +71,23 @@ class UsersDB:
         except:
             print("ha ocurrido un error");
             return False;
+    
+    def registerMedic(data, session):
+        try:
+            db = connectDb();
+            cursor = db.cursor();
+
+            sql = """ 
+                INSERT INTO "public"."medico" ("Email", "Id",   "Name", "Pass", "Specialty", "IdHospital") VALUES (%s,%s,%s,%s,%s,%s)
+            """;
+
+            val = (data["email"], data["id"], data["name"], data["pass"], data["spec"], session["id"]);
+
+            cursor.execute(sql, val);
+
+            db.commit();
+
+            return True;
+        except:
+            print("Ocurrió un error");
+            return False;

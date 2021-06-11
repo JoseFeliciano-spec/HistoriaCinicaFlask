@@ -9,10 +9,16 @@ def Routes(app):
     app.secret_key = createSecret();
 
     """ Las rutas. """
+    #Registrar usuarios en general
     registerUser(app);
+    #Verificar ese susodicho usuario
     verifyUser(app);
+    #Logear el usuario
     loginUser(app);
+    #Registrar información adicional dependiendo el tipo de usuario ya sea hospital o paciente
     regInformationUser(app);
+    #Registrar un médico, (solamente los usuarios tipo hospital)
+    registerMedic(app);
 
 def registerUser(app):
     @app.route("/api/registerUser", methods=["POST"])
@@ -69,6 +75,32 @@ def loginUser(app):
                 return jsonify([response]);
             else:
                 response = {"response": "No se puedo iniciar sesión, revise si los campos está correctos o estás verificado"};
+                return jsonify([response]);
+
+def registerMedic(app):
+    @app.route("/api/registerMedic", methods=["POST"])
+    def functionRegM():
+        if request.method == "POST":
+            data = request.json;
+            if "username" in session:
+                if "hospital" in session["username"]["type"]:
+                    expression = (not "email" in data.keys()) or (not "id" in data.keys()) or (not "name" in data.keys()) or (not "pass" in data.keys()) or (not "spec" in data.keys());
+
+                    if expression:
+                        response = {"response" : "Faltan datos por recopilar"}
+                        return jsonify([response]);
+
+                    if(UsersDB.registerMedic(data, session["username"])):
+                        response = {"response" : "Se ha registrado el médico."}
+                        return jsonify([response]);
+                    else:
+                        response = {"response" : "Ha ocurrido un error al momento de registrar el médico. Revisar la base de datos o los campos sin están vacíos."}
+                        return jsonify([response]);
+                else:
+                    response = {"response" : "No tiene los permisos suficientes cómo para realizar esta acción"}
+                    return jsonify([response]);
+            else:
+                response = {"response" : "No estás logueado"};
                 return jsonify([response]);
 
 def regInformationUser(app):
@@ -135,7 +167,6 @@ def regInformationPaciente(data, session):
         "name" : data["name"],
         "address" : data["address"]
     }
-
 
     if UsersDB.regBasicInfoUser(map, session["username"]):
         return True;
