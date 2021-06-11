@@ -29,6 +29,8 @@ def Routes(app):
     regObservationP(app)
     #Imprimir la información
     printInformation(app)
+    #Cambio de contraseña usuarios (Paciente y Hospital)
+    changePasswordAllUser(app)
 
 def registerUser(app):
     @app.route("/api/registerUser", methods=["POST"])
@@ -61,9 +63,16 @@ def verifyUser(app):
     @app.route("/api/verifyUser", methods=["POST"])
     def functionVerify():
         if request.method == "POST":
-            if "phone" in request.json.keys():
-                print("phone");
-            return jsonify("asdasd");
+            data = request.json;
+            if "id" in request.json.keys():
+                if UsersDB.verifyUser(data["id"]):
+                    response = {"response" : "Se ha verificado correctamente"};
+                    return jsonify([response]);
+                else:
+                    response = {"response" : "No se ha podido verificar"};
+                    return jsonify([response]);
+            
+            return jsonify([{"response": "No ha puesto el Id para verificarlo"}]);
 
 
 def loginUser(app):
@@ -307,3 +316,24 @@ def printInformation(app):
             response = {"response" : "No estás logueado, por favor inicie sesión"};
 
             return jsonify([response]);
+
+""" 
+    Cambio de contraseña de todos los usuarios
+"""
+def changePasswordAllUser(app):
+    @app.route("/api/changePasswordAll", methods=["PUT"])
+    def changePassAll():
+        if request.method == "PUT":
+            data = request.json;
+            expression = (not "id" in data.keys() or not "newPass" in data.keys());
+
+            if expression:
+                response = {"response":  "Faltan datos, por favor revise el formulario"};
+                return jsonify([response]);
+
+            if UsersDB.changePassword(data):
+                response = {"response": "Se ha actualizado correctamente la contraseña"};
+                return jsonify([response]);
+            else:
+                response = {"response": "No se ha podido actualizar correctamente la contraseña"};
+                return jsonify([response]);            

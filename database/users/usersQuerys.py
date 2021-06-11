@@ -19,6 +19,20 @@ class UsersDB:
             print("ha ocurrido un error");
             return False;
     
+
+    #Verificar usuario
+    def verifyUser(id):
+        try:
+            db = connectDb();
+            cursor = db.cursor();
+            query = """ 
+                UPDATE "public"."users" SET "Verification" = {} where "Iden" = {}""".format(True, id);
+            cursor.execute(query);
+            db.commit();
+            return True;
+        except:
+            return False;
+
     #Login para los usuarios de diferentes tipos
     def loginUserInDb(data):
         """ Solamente se logueará cuando el usuario esté verificado. """
@@ -154,5 +168,19 @@ class UsersDB:
         except Exception as ex:
             return False, None;
             print("Error : {}".format(ex));
-    
+
+    #Cambiar contraseña de todos los usuarios (Hospital o Paciente)
+    def changePassword(data):
+        try:
+            db = connectDb();
+            cursor = db.cursor();
+            query = """ 
+                UPDATE "public"."users" SET "Pass" = '{}' where "Iden" = '{}' 
+            """.format(data["newPass"], data["id"]);
+            cursor.execute(query);
+            db.commit();
+            return True;
+        except Exception as ex:
+            print("El error : {}".format(ex))
+            return False;
     
