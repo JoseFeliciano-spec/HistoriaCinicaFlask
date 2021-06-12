@@ -91,22 +91,34 @@ class MedicDB:
             cursor = db.cursor();
 
             query = """ 
-                SELECT * FROM "public"."observaciones" where "IdMedico" = {} 
+                SELECT 
+                "observaciones"."Observations",
+                "observaciones"."HealthCondition",
+                "medico"."Name",
+                "medico"."Specialty",
+                "hospital"."Name",
+                "hospital"."MedicService"
+                FROM "public"."observaciones" 
+                inner join "public"."medico" on "observaciones"."IdMedico" = "medico"."Id"
+                inner join "public"."hospital" on "medico"."IdHospital" = "hospital"."Id"
+                where "observaciones"."IdMedico" = {} 
             """.format(id);
 
             cursor.execute(query);
 
             rows = cursor.fetchall();
 
-            print(rows);
+            #print(rows);
             arr = [];
             for row in rows:
-                print(row);
+                #print(row);
                 map = {
-                    "idPaciente": str(row[1]),
-                    "idMedico": str(row[2]),
-                    "observation": str(row[3]),
-                    "healthCondition": row[4]
+                    "observation": str(row[0]),
+                    "healthCondition": str(row[1]),
+                    "nameMedic": str(row[2]),
+                    "specialty": row[3],
+                    "nameHospital": row[4],
+                    "medicService": row[5]
                 }
                 arr.append(map);
             return True, arr;
